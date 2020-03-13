@@ -3,6 +3,9 @@ package com.everis.bootcamp.clientms.service;
 import java.net.URI;
 import java.util.Date;
 import reactor.core.publisher.Mono;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +20,11 @@ import reactor.core.publisher.Flux;
 @Service
 public class ClientServiceImpl implements ClientService{
 
+	private static final Logger log = LoggerFactory.getLogger(ClientServiceImpl.class);
+
 	@Autowired
 	private ClientRepository clientRepo;
+
 
 	@Override
 	public Mono<Client> findByName(String name) {
@@ -66,10 +72,13 @@ public class ClientServiceImpl implements ClientService{
 			cl.setBusiness(false);
 		}
 
-		clientRepo.save(cl).map(c -> ResponseEntity.created(URI.create("/clients".concat(c.getId())))
-				.contentType(MediaType.APPLICATION_JSON).body(c));
 
-		Response respuesta = new Response("1","Cliente guardado exitosamente",cl);
+		clientRepo.save(cl).subscribe(clAux -> {
+			log.info("Cliente guardado" + clAux.getId() + " " + clAux.getName());
+		});
+
+
+		Response respuesta=new Response("1","Cliente guardado exitosamente",cl);
 		return Mono.justOrEmpty(respuesta);
 
 	}
@@ -148,6 +157,8 @@ public class ClientServiceImpl implements ClientService{
 	@Override
 	public Mono<Response> updateV2(Client cl, String id) {	
 
+		Response respuesta = new Response();
+
 		clientRepo.findById(id)
 		.flatMap(dbClient -> {
 			//JoinDate
@@ -194,17 +205,19 @@ public class ClientServiceImpl implements ClientService{
 
 			//validaciones
 			if(dbClient.getBusiness() == dbClient.getPersonal()) {
-				Response respuesta = new Response("0","Los campos business y personal no pueden ser iguales");
-				return Mono.justOrEmpty(respuesta);
-			}
+				respuesta.setCode("0");
+				respuesta.setMessage("Los campos business y personal no pueden ser iguales");
 
-			clientRepo.save(dbClient);
-			Response respuesta = new Response("1","Cliente actualizado exitosamente",dbClient);
+			}else {
+				clientRepo.save(dbClient).subscribe();
+				respuesta.setCode("0");
+				respuesta.setMessage("Cliente actualizado exitosamente");
+			}
 			return Mono.justOrEmpty(respuesta);
 		});
 
-		Response respuesta = new Response("1","Cliente actualizado exitosamente");
-		return Mono.justOrEmpty(respuesta);
+
+		return Mono.empty();
 	}
 
 	@Override
