@@ -1,10 +1,14 @@
 package com.everis.bootcamp.clientms.service;
 
+import java.net.URI;
 import java.util.Date;
 import reactor.core.publisher.Mono;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.everis.bootcamp.clientms.common.Response;
 import com.everis.bootcamp.clientms.dao.ClientRepository;
 import com.everis.bootcamp.clientms.model.Client;
 
@@ -37,11 +41,61 @@ public class ClientServiceImpl implements ClientService{
 	}
 
 	@Override
-	public Mono<Client> save(Client cl) {
+	public Mono<Response> save(Client cl) {
 		if (cl.getJoinDate() == null) {
 			cl.setJoinDate(new Date());
 		}else {
 			cl.setJoinDate(cl.getJoinDate());
+		}
+
+		if(cl.getBusiness() == null && cl.getPersonal() == null) {
+			Response respuesta = new Response("0","Es obligatorio llenar los campos business o personal");
+			return Mono.justOrEmpty(respuesta);
+		}
+
+		if(cl.getBusiness() == cl.getPersonal()) {
+			Response respuesta = new Response("0","Los campos business y personal no pueden ser iguales");
+			return Mono.justOrEmpty(respuesta);
+		}
+
+		if(cl.getBusiness()!=null && cl.getBusiness()==true) {
+			cl.setPersonal(false);
+		}
+
+		if(cl.getPersonal()!=null && cl.getPersonal()==true) {
+			cl.setBusiness(false);
+		}
+
+		clientRepo.save(cl).map(c -> ResponseEntity.created(URI.create("/clients".concat(c.getId())))
+				.contentType(MediaType.APPLICATION_JSON).body(c));
+
+		Response respuesta = new Response("1","Cliente guardado exitosamente",cl);
+		return Mono.justOrEmpty(respuesta);
+
+	}
+
+	@Override
+	public Mono<Client> create (Client cl) {
+		if (cl.getJoinDate() == null) {
+			cl.setJoinDate(new Date());
+		}else {
+			cl.setJoinDate(cl.getJoinDate());
+		}
+
+		if(cl.getBusiness() == null && cl.getPersonal() == null) {
+			return Mono.empty();
+		}
+
+		if(cl.getBusiness() == cl.getPersonal()) {
+			return Mono.empty();
+		}
+
+		if(cl.getBusiness()!=null && cl.getBusiness()==true) {
+			cl.setPersonal(false);
+		}
+
+		if(cl.getPersonal()!=null && cl.getPersonal()==true) {
+			cl.setBusiness(false);
 		}
 
 		return clientRepo.save(cl);
@@ -52,7 +106,7 @@ public class ClientServiceImpl implements ClientService{
 	public Mono<Client> update(Client cl, String id) {
 		return clientRepo.findById(id)
 				.flatMap(dbClient -> {
-					
+
 					//JoinDate
 					if(cl.getJoinDate() == null) {
 						dbClient.setJoinDate(new Date());
@@ -87,8 +141,70 @@ public class ClientServiceImpl implements ClientService{
 
 					return clientRepo.save(dbClient);
 
-					});
+				});
 
+	}
+
+	@Override
+	public Mono<Response> updateV2(Client cl, String id) {	
+
+		clientRepo.findById(id)
+		.flatMap(dbClient -> {
+			//JoinDate
+			if(cl.getJoinDate() == null) {
+				dbClient.setJoinDate(new Date());
+			}else {
+				dbClient.setJoinDate(cl.getJoinDate());
+			}
+
+			//name
+			if(cl.getName() != null) {
+				dbClient.setName(cl.getName());
+			}
+
+			//NumDoc
+			if(cl.getNumDoc() != null) {
+				dbClient.setNumDoc(cl.getNumDoc());
+			}
+
+			//Address
+			if(cl.getAddress() != null) {
+				dbClient.setAddress(cl.getAddress());
+			}
+
+			//Age
+			if(cl.getAge() != 0) {
+				dbClient.setAge(cl.getAge());
+			}
+
+			//cellphone
+			if(cl.getCellphone() != null) {
+				dbClient.setCellphone(cl.getCellphone());
+			}
+
+			//personal
+			if(cl.getPersonal() != null) {
+				dbClient.setPersonal(cl.getPersonal());
+			}
+
+			//business
+			if(cl.getBusiness() != null) {
+				dbClient.setBusiness(cl.getBusiness());
+			}	
+
+			//validaciones
+			if(dbClient.getBusiness() == dbClient.getPersonal()) {
+				Response respuesta = new Response("0","Los campos business y personal no pueden ser iguales");
+				return Mono.justOrEmpty(respuesta);
+			}
+
+			clientRepo.save(dbClient);
+			Response respuesta = new Response("1","Cliente actualizado exitosamente",dbClient);
+			return Mono.justOrEmpty(respuesta);
+		});
+
+		Response respuesta = new Response("1","Cliente actualizado exitosamente");
+		return Mono.justOrEmpty(respuesta);
 	}
 
 	@Override

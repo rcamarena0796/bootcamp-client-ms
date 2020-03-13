@@ -1,6 +1,7 @@
 package com.everis.bootcamp.clientms.model;
 
 import lombok.AllArgsConstructor;
+import javax.validation.constraints.NotEmpty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -24,4 +25,8 @@ public class Client {
 	private String address;
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private Date joinDate;
+	@NotEmpty(message = "personal field cant be empty")
+	private Boolean personal;
+	@NotEmpty(message = "business field cant be empty")
+	private Boolean business;
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everis.bootcamp.clientms.common.Response;
 import com.everis.bootcamp.clientms.model.Client;
 import com.everis.bootcamp.clientms.service.ClientService;
 
@@ -58,10 +59,17 @@ public class ClientController {
 	public Mono<Client> findByNumDoc(@PathVariable("numDoc") String numDoc){
 		return service.findByNumDoc(numDoc);
 	}
+
     
     @PostMapping("/save")
-	public Mono<ResponseEntity<Client>> save(@RequestBody Client client){
-		return service.save(client).map(c -> ResponseEntity.created(URI.create("/clients".concat(c.getId())))
+	public Mono<ResponseEntity<Response>> save(@RequestBody Client client){
+		return service.save(client).map(c -> ResponseEntity.created(URI.create("/clients".concat(c.getCode())))
+				.contentType(MediaType.APPLICATION_JSON).body(c));
+	}
+    
+    @PostMapping("/create")
+	public Mono<ResponseEntity<Client>> create(@RequestBody Client cl){
+		return service.create(cl).map(c -> ResponseEntity.created(URI.create("/clients".concat(c.getId())))
 				.contentType(MediaType.APPLICATION_JSON).body(c));
 	}
     
@@ -70,6 +78,15 @@ public class ClientController {
   	public Mono<ResponseEntity<Client>> update(@PathVariable("id") String id, @RequestBody Client cl){
   		return service.update(cl, id)
   				.map(c -> ResponseEntity.created(URI.create("/clients".concat(c.getId())))
+  						.contentType(MediaType.APPLICATION_JSON).body(c))
+  				.defaultIfEmpty(ResponseEntity.notFound().build());
+  	}
+    
+  //ACTUALIZAR UN CLIENTE
+  	@PutMapping("/updatev2/{id}")
+  	public Mono<ResponseEntity<Response>> updatev2(@PathVariable("id") String id, @RequestBody Client cl){
+  		return service.updateV2(cl, id)
+  				.map(c -> ResponseEntity.created(URI.create("/clients".concat(c.getCode())))
   						.contentType(MediaType.APPLICATION_JSON).body(c))
   				.defaultIfEmpty(ResponseEntity.notFound().build());
   	}
