@@ -14,10 +14,5 @@ import com.everis.bootcamp.clientms.model.Client;
 public class Response {
 	private String code;
 	private String message;
-	private Client cliente;
-	
-	public Response(String code, String message) {
-		this.code=code;
-		this.message=message;
-	}
+
 }
