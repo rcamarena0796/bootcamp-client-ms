@@ -1,4 +1,4 @@
-package com.everis.bootcamp.clientms;
+package com.everis.bootcamp.clientms.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
