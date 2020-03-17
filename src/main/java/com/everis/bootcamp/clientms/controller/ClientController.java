@@ -29,7 +29,7 @@ import org.springframework.http.ResponseEntity;
 
 import javax.validation.Valid;
 
-@Api(tags = "Client API",  description = "CRUD operations for clients")
+@Api(tags = "Client API",  value = "CRUD operations for clients")
 @RestController
 @RequestMapping("/api/client")
 public class ClientController {
@@ -45,73 +45,53 @@ public class ClientController {
         return Mono.justOrEmpty(hola);
     }
 
-    @GetMapping("/selectAll")
-    public Mono<ResponseEntity<Flux<Client>>> list() {
-        return Mono.just(ResponseEntity
-                .ok()
-                .contentType(MediaType
-                        .APPLICATION_JSON)
-                .body(service
-                        .findAll()));
-    }
-
+    @ApiOperation(value = "Service used to return all clients")
     @GetMapping("/findAll")
     public Flux<Client> findAll() {
         return service.findAll();
     }
 
+    @ApiOperation(value = "Service used to find a client by id")
     @GetMapping("/findById/{id}")
     public Mono<Client> findById(@PathVariable("id") String id) {
         return service.findById(id);
     }
 
+    @ApiOperation(value = "Service used to find a client by numDoc")
     @GetMapping("/find/{numDoc}")
     public Mono<Client> findByNumDoc(@PathVariable("numDoc") String numDoc) {
         return service.findByNumDoc(numDoc);
     }
 
     //GUARDAR UN CLIENTE
-    @ApiOperation(value = "Servicio utilizado para crear un cliente")
+    @ApiOperation(value = "Service used to create clients")
     @PostMapping("/save")
     public Mono<ResponseEntity<Client>> create(@Valid @RequestBody Client cl) {
         return service.save(cl)
                 .map(c -> ResponseEntity
-                        .created(URI
-                                .create("/clients"
-                                        .concat(c
-                                                .getId())))
-                        .contentType(MediaType
-                                .APPLICATION_JSON)
+                        .created(URI.create("/clients".concat(c.getId())))
+                        .contentType(MediaType.APPLICATION_JSON)
                         .body(c));
     }
 
     //ACTUALIZAR UN CLIENTE
-    @ApiOperation(value = "Servicio utilizado para actualizar un cliente")
+    @ApiOperation(value = "Service used to update a client")
     @PutMapping("/update/{id}")
     public Mono<ResponseEntity<Client>> update(@PathVariable("id") String id, @RequestBody Client cl) {
         return service.update(cl, id)
                 .map(c -> ResponseEntity
-                        .created(URI
-                                .create("/clients"
-                                        .concat(c
-                                                .getId())))
-                        .contentType(MediaType
-                                .APPLICATION_JSON)
+                        .created(URI.create("/clients".concat(c.getId())))
+                        .contentType(MediaType.APPLICATION_JSON)
                         .body(c))
-                .defaultIfEmpty(ResponseEntity
-                        .notFound()
-                        .build());
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     //ELIMINAR UN CLIENTE
-    @ApiOperation(value = "Servicio utilizado para borrar un cliente")
+    @ApiOperation(value = "Service used to delete a client")
     @DeleteMapping("/delete/{id}")
     public Mono<ResponseEntity<Void>> delete(@PathVariable String id) {
         return service.delete(id)
-                .then(Mono
-                        .just(new ResponseEntity<Void>(HttpStatus
-                                .NO_CONTENT)))
-                .defaultIfEmpty(new ResponseEntity<Void>(HttpStatus
-                        .NOT_FOUND));
+                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
+                .defaultIfEmpty(new ResponseEntity<Void>(HttpStatus.NOT_FOUND));
     }
 }
