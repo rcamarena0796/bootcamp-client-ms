@@ -1,18 +1,15 @@
 package com.everis.bootcamp.clientms.service;
 
-import java.net.URI;
 import java.util.Date;
+import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.everis.bootcamp.clientms.common.Response;
 import com.everis.bootcamp.clientms.dao.ClientRepository;
 import com.everis.bootcamp.clientms.model.Client;
 
@@ -48,24 +45,6 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public Mono<Response> saveWithMessage(Client cl) {
-        if (cl.getJoinDate() == null) {
-            cl.setJoinDate(new Date());
-        } else {
-            cl.setJoinDate(cl.getJoinDate());
-        }
-
-        clientRepo.save(cl).subscribe(clAux -> {
-            log.info("Cliente guardado" + clAux.getId() + " " + clAux.getName());
-        });
-
-
-        Response respuesta = new Response("1", "Cliente guardado exitosamente");
-        return Mono.justOrEmpty(respuesta);
-
-    }
-
-    @Override
     public Mono<Client> save(Client cl) {
         if (cl.getJoinDate() == null) {
             cl.setJoinDate(new Date());
@@ -83,32 +62,32 @@ public class ClientServiceImpl implements ClientService {
                 .flatMap(dbClient -> {
 
                     //JoinDate
-                    if (cl.getJoinDate() != null) {
+                    if (!Optional.of(cl.getJoinDate()).equals(Optional.of(null))) {
                         dbClient.setJoinDate(cl.getJoinDate());
                     }
 
                     //name
-                    if (cl.getName() != null) {
+                    if (!Optional.of(cl.getName()).equals(Optional.of(null))) {
                         dbClient.setName(cl.getName());
                     }
 
                     //NumDoc
-                    if (cl.getNumDoc() != null) {
+                    if (!Optional.of(cl.getNumDoc()).equals(Optional.of(null))) {
                         dbClient.setNumDoc(cl.getNumDoc());
                     }
 
                     //Address
-                    if (cl.getAddress() != null) {
+                    if (!Optional.of(cl.getAddress()).equals(Optional.of(null))) {
                         dbClient.setAddress(cl.getAddress());
                     }
 
                     //Age
-                    if (cl.getAge() != 0) {
+                    if (!Optional.of(cl.getAge()).equals(Optional.of(null))) {
                         dbClient.setAge(cl.getAge());
                     }
 
                     //cellphone
-                    if (cl.getCellphone() != null) {
+                    if (!Optional.of(cl.getCellphone()).equals(Optional.of(null))) {
                         dbClient.setCellphone(cl.getCellphone());
                     }
 
@@ -119,56 +98,10 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public Mono<Response> updateWithMessage(Client cl, String id) {
-
-        Response respuesta = new Response();
-
-        Client dbClient = clientRepo.findById(id).block();
-
-
-        //JoinDate
-        if (cl.getJoinDate() == null) {
-            dbClient.setJoinDate(new Date());
-        } else {
-            dbClient.setJoinDate(cl.getJoinDate());
-        }
-
-        //name
-        if (cl.getName() != null) {
-            dbClient.setName(cl.getName());
-        }
-
-        //NumDoc
-        if (cl.getNumDoc() != null) {
-            dbClient.setNumDoc(cl.getNumDoc());
-        }
-
-        //Address
-        if (cl.getAddress() != null) {
-            dbClient.setAddress(cl.getAddress());
-        }
-
-        //Age
-        if (cl.getAge() != 0) {
-            dbClient.setAge(cl.getAge());
-        }
-
-        //cellphone
-        if (cl.getCellphone() != null) {
-            dbClient.setCellphone(cl.getCellphone());
-        }
-
-        clientRepo.save(dbClient).subscribe();
-        respuesta.setCode("1");
-        respuesta.setMessage("Cliente actualizado exitosamente");
-
-        return Mono.justOrEmpty(respuesta);
-
-    }
-
-    @Override
-    public Mono<Void> delete(Client c) {
-        return clientRepo.delete(c);
+    public Mono<Void> delete(String id) {
+        return clientRepo.findById(id).flatMap(cl -> {
+            return clientRepo.delete(cl);
+        });
     }
 
 }
