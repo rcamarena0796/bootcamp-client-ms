@@ -62,32 +62,32 @@ public class ClientServiceImpl implements ClientService {
                 .flatMap(dbClient -> {
 
                     //JoinDate
-                    if (!Optional.of(cl.getJoinDate()).equals(Optional.of(null))) {
+                    if (cl.getJoinDate()!=null) {
                         dbClient.setJoinDate(cl.getJoinDate());
                     }
 
                     //name
-                    if (!Optional.of(cl.getName()).equals(Optional.of(null))) {
+                    if (cl.getName()!=null) {
                         dbClient.setName(cl.getName());
                     }
 
                     //NumDoc
-                    if (!Optional.of(cl.getNumDoc()).equals(Optional.of(null))) {
+                    if (cl.getNumDoc()!=null) {
                         dbClient.setNumDoc(cl.getNumDoc());
                     }
 
                     //Address
-                    if (!Optional.of(cl.getAddress()).equals(Optional.of(null))) {
+                    if (cl.getAddress()!=null) {
                         dbClient.setAddress(cl.getAddress());
                     }
 
                     //Age
-                    if (!Optional.of(cl.getAge()).equals(Optional.of(null))) {
+                    if (cl.getAge()!=0) {
                         dbClient.setAge(cl.getAge());
                     }
 
                     //cellphone
-                    if (!Optional.of(cl.getCellphone()).equals(Optional.of(null))) {
+                    if (cl.getCellphone()!=null) {
                         dbClient.setCellphone(cl.getCellphone());
                     }
 
