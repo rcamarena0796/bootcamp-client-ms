@@ -31,6 +31,6 @@ public class Client {
     private String address;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date joinDate;
-    @NotBlank(message = "'type' is required")
-    private String type;
+    @NotBlank(message = "'idClientType' is required")
+    private String idClientType;
 }
