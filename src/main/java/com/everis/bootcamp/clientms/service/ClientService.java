@@ -15,5 +15,7 @@ public interface ClientService {
 	public Mono<Client> update(Client c, String id);
 	public Mono<Void> delete(String id);
 	public Mono<Client> save (Client cl);
+	public Mono<Boolean> existsByNumDoc (String numDoc);
+	public Mono<String> getClientTypeByNumDoc (String numDoc);
 
 }

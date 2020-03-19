@@ -4,7 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import javax.validation.constraints.NotBlank;
 
 @Data
 @NoArgsConstructor
@@ -12,6 +15,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "CLIENT_TYPE")
 @EqualsAndHashCode(callSuper = false)
 public class ClientType {
+    @Id
+    private String id;
+    @NotBlank(message = "'numId' is required")
     private String numId;
-    private int name;
+    private String name;
 }

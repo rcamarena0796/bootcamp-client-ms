@@ -18,7 +18,7 @@ import reactor.core.publisher.Flux;
 @Service
 public class ClientServiceImpl implements ClientService {
 
-    private static final Logger log = LoggerFactory.getLogger(ClientServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClientServiceImpl.class);
 
     @Autowired
     private ClientRepository clientRepo;
@@ -109,6 +109,27 @@ public class ClientServiceImpl implements ClientService {
             return clientRepo.findById(id).flatMap(cl -> {
                 return clientRepo.delete(cl);
             });
+        } catch (Exception e) {
+            return Mono.error(e);
+        }
+    }
+
+    @Override
+    public Mono<Boolean> existsByNumDoc(String numDoc) {
+        return clientRepo.existsByNumDoc(numDoc);
+    }
+
+    @Override
+    public Mono<String> getClientTypeByNumDoc(String numDoc) {
+        try {
+            Mono<Client> cliente = clientRepo.findByNumDoc(numDoc).switchIfEmpty(Mono.justOrEmpty(new Client()));
+            Mono<String> ret = cliente.map(cl -> {
+                logger.info("ENCONTRE ESTO :" + cl.getIdClientType());
+                if (cl.getIdClientType() != null) {
+                    return cl.getIdClientType();
+                } else return "-1";
+            });
+            return ret;
         } catch (Exception e) {
             return Mono.error(e);
         }

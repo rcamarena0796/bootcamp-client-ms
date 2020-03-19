@@ -9,4 +9,5 @@ import reactor.core.publisher.Mono;
 public interface ClientRepository extends ReactiveMongoRepository<Client, String> {
 	public Mono<Client> findByName(String nombre);
 	public Mono<Client> findByNumDoc(String numDoc);
+	public Mono<Boolean> existsByNumDoc(String numDoc);
 }

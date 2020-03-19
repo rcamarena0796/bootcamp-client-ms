@@ -7,5 +7,5 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Mono;
 
 public interface ClientTypeRepository extends ReactiveMongoRepository<ClientType, String> {
-    public Mono<ClientType> findByNumId(int numId);
+    public Mono<ClientType> findByNumId(String numId);
 }
