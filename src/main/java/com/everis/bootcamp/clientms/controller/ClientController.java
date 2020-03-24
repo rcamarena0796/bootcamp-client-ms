@@ -31,7 +31,7 @@ import javax.validation.Valid;
 
 @Api(tags = "Client API",  value = "CRUD operations for clients")
 @RestController
-@RequestMapping("/api/client")
+@RequestMapping("/client")
 public class ClientController {
 
     @Autowired
