@@ -3,6 +3,7 @@ package com.everis.bootcamp.clientms.service.impl;
 import java.util.Date;
 
 import com.everis.bootcamp.clientms.service.ClientService;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import org.slf4j.Logger;
@@ -44,15 +45,34 @@ public class ClientServiceImpl implements ClientService {
         return clientRepo.findByNumDoc(numDoc);
     }
 
+
+    private Mono<Boolean> getExistBank(String numId) {
+        String url = "http://localhost:8002/bank/exist/" + numId;
+        return WebClient.create()
+                .get()
+                .uri(url)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+    }
+
     @Override
     public Mono<Client> save(Client cl) {
         try {
-            if (cl.getJoinDate() == null) {
-                cl.setJoinDate(new Date());
-            } else {
-                cl.setJoinDate(cl.getJoinDate());
-            }
-            return clientRepo.save(cl);
+            Mono<Boolean> existeBanco = getExistBank(cl.getBankId());
+
+            return existeBanco.flatMap(existe -> {
+                if (existe) {
+                    if (cl.getJoinDate() == null) {
+                        cl.setJoinDate(new Date());
+                    } else {
+                        cl.setJoinDate(cl.getJoinDate());
+                    }
+                    return clientRepo.save(cl);
+                } else {
+                    return Mono.error(new Exception("El banco del cliente no existe"));
+                }
+            });
+
         } catch (Exception e) {
             return Mono.error(e);
         }

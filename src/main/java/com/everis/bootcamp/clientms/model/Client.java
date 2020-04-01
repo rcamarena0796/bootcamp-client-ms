@@ -27,6 +27,8 @@ public class Client {
     private int age;
     @NotBlank(message = "'numDoc' is required")
     private String numDoc;
+    @NotBlank(message = "'bankId' is required")
+    private String bankId;
     private String cellphone;
     private String address;
     @JsonFormat(pattern = "yyyy-MM-dd")
