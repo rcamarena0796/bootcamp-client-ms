@@ -1,6 +1,8 @@
 package com.everis.bootcamp.clientms.service.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Set;
 
 import com.everis.bootcamp.clientms.service.ClientService;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -53,6 +55,15 @@ public class ClientServiceImpl implements ClientService {
                 .uri(url)
                 .retrieve()
                 .bodyToMono(Boolean.class);
+    }
+
+    private Mono<Set<String>> getClientProfiles(String numId) {
+        String url = "http://localhost:8002/bank/bankProfiles/" + numId;
+        return WebClient.create()
+                .get()
+                .uri(url)
+                .retrieve()
+                .bodyToMono((Class<Set<String>>) new ArrayList<String>().getClass());
     }
 
     @Override
