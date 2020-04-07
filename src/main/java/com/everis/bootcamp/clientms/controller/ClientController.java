@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiOperation;
 import java.net.URI;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -103,8 +102,13 @@ public class ClientController {
   @ApiOperation(value = "Service used to delete a client")
   @DeleteMapping("/delete/{id}")
   public Mono<ResponseEntity<Void>> delete(@PathVariable String id) {
-    return service.delete(id)
-        .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
-        .defaultIfEmpty(new ResponseEntity<Void>(HttpStatus.NOT_FOUND));
+    return service.delete(id).map(res -> ResponseEntity
+        .ok()
+        .<Void>build())
+        .defaultIfEmpty(ResponseEntity
+            .notFound()
+            .build()
+        );
+
   }
 }

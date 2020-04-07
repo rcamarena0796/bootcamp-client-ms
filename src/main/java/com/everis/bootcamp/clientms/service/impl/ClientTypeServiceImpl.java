@@ -58,10 +58,11 @@ public class ClientTypeServiceImpl implements ClientTypeService {
   }
 
   @Override
-  public Mono<Void> delete(String id) {
+  public Mono<String> delete(String id) {
     try {
-      return repo.findById(id).flatMap(cl -> {
-        return repo.delete(cl);
+      return repo.findById(id).map(cl -> {
+        repo.delete(cl).subscribe();
+        return cl.getId();
       });
     } catch (Exception e) {
       return Mono.error(e);

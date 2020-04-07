@@ -23,7 +23,7 @@ import reactor.core.publisher.Mono;
 
 @Api(tags = "Client type API", value = "CRUD operations for client type")
 @RestController
-@RequestMapping("/api/clientType")
+@RequestMapping("/client/clientType")
 public class ClientTypeController {
 
   @Autowired
@@ -40,7 +40,7 @@ public class ClientTypeController {
 
   @ApiOperation(value = "Service used to find a client by id")
   @GetMapping("/find/{numId}")
-  public Mono<ClientType> findByNumId(@PathVariable("id") String id) {
+  public Mono<ClientType> findByNumId(@PathVariable("numId") String id) {
     return service.findByNumId(id);
   }
 
@@ -79,7 +79,12 @@ public class ClientTypeController {
   @DeleteMapping("/delete/{id}")
   public Mono<ResponseEntity<Void>> delete(@PathVariable String id) {
     return service.delete(id)
-        .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
-        .defaultIfEmpty(new ResponseEntity<Void>(HttpStatus.NOT_FOUND));
+        .map(res -> ResponseEntity
+            .ok()
+            .<Void>build())
+        .defaultIfEmpty(ResponseEntity
+            .notFound()
+            .build()
+        );
   }
 }

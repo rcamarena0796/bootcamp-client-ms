@@ -12,7 +12,7 @@ public interface ClientTypeService {
 
   public Mono<ClientType> update(ClientType c, String numId);
 
-  public Mono<Void> delete(String id);
+  public Mono<String> delete(String id);
 
   public Mono<ClientType> save(ClientType cl);
 }

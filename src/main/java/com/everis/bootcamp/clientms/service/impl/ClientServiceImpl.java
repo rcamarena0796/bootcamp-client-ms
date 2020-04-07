@@ -1,15 +1,14 @@
 package com.everis.bootcamp.clientms.service.impl;
 
 import com.everis.bootcamp.clientms.dao.ClientRepository;
-import com.everis.bootcamp.clientms.dto.ClientProfilesDto;
 import com.everis.bootcamp.clientms.model.Client;
 import com.everis.bootcamp.clientms.service.ClientService;
+import com.everis.bootcamp.clientms.service.ExternalCallService;
 import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -21,11 +20,8 @@ public class ClientServiceImpl implements ClientService {
   @Autowired
   private ClientRepository clientRepo;
 
-
-  @Override
-  public Mono<Client> findByName(String name) {
-    return clientRepo.findByName(name);
-  }
+  @Autowired
+  private ExternalCallService externalCall;
 
   @Override
   public Flux<Client> findAll() {
@@ -43,51 +39,26 @@ public class ClientServiceImpl implements ClientService {
   }
 
 
-  private Mono<Boolean> getExistBank(String numId) {
-    String url = "http://localhost:8002/bank/exist/" + numId;
-    return WebClient.create()
-        .get()
-        .uri(url)
-        .retrieve()
-        .bodyToMono(Boolean.class);
-  }
-
-  private Mono<Boolean> verifyProfile(String bankId, String profileId) {
-    String url = "http://localhost:8002/bank/bankProfiles/" + bankId;
-    Mono<ClientProfilesDto> profilesDto = WebClient.create()
-        .get()
-        .uri(url)
-        .retrieve()
-        .bodyToMono(ClientProfilesDto.class);
-
-    return profilesDto.map(p -> {
-      if (p.getClientProfiles().contains(profileId)) {
-        return true;
-      } else {
-        return false;
-      }
-    });
-  }
-
   @Override
   public Mono<Client> save(Client cl) {
     try {
-      Mono<Boolean> existeBanco = getExistBank(cl.getBankId());
+      Mono<Boolean> existeBanco = externalCall.getExistBank(cl.getBankId());
 
       return existeBanco.flatMap(existe -> {
         if (existe) {
-          return verifyProfile(cl.getBankId(), cl.getIdClientType()).flatMap(verify -> {
-            if (verify) {
-              if (cl.getJoinDate() == null) {
-                cl.setJoinDate(new Date());
-              } else {
-                cl.setJoinDate(cl.getJoinDate());
-              }
-              return clientRepo.save(cl);
-            } else {
-              return Mono.error(new Exception("El tipo de cliente no existe en el banco"));
-            }
-          });
+          return externalCall.verifyProfile(cl.getBankId(), cl.getIdClientType())
+              .flatMap(verify -> {
+                if (verify) {
+                  if (cl.getJoinDate() == null) {
+                    cl.setJoinDate(new Date());
+                  } else {
+                    cl.setJoinDate(cl.getJoinDate());
+                  }
+                  return clientRepo.save(cl);
+                } else {
+                  return Mono.error(new Exception("El tipo de cliente no existe en el banco"));
+                }
+              });
         } else {
           return Mono.error(new Exception("El banco del cliente no existe"));
         }
@@ -144,11 +115,12 @@ public class ClientServiceImpl implements ClientService {
   }
 
   @Override
-  public Mono<Void> delete(String id) {
+  public Mono<String> delete(String id) {
     try {
-      return clientRepo.findById(id).flatMap(cl -> {
-        return clientRepo.delete(cl);
-      });
+      return clientRepo.findById(id).map(cl -> {
+        clientRepo.delete(cl).subscribe();
+        return cl.getId();
+      }).switchIfEmpty(Mono.empty());
     } catch (Exception e) {
       return Mono.error(e);
     }
