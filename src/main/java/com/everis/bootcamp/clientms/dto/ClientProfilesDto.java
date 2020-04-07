@@ -1,14 +1,14 @@
 package com.everis.bootcamp.clientms.dto;
 
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClientProfilesDTO {
-    private Set<String> clientProfiles;
+public class ClientProfilesDto {
+
+  private Set<String> clientProfiles;
 }
